@@ -1,0 +1,50 @@
+C51 COMPILER V9.55   MAIN                                                                  07/18/2016 23:15:45 PAGE 1   
+
+
+C51 COMPILER V9.55, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\Keil_C51\C51\BIN\C51.EXE main.c OPTIMIZE(8,SIZE) BROWSE INCDIR(.\Serial) DEBUG OBJECTEXTEND TABS
+                    -(2)
+
+line level    source
+
+   1          #include "define.h"
+   2          #include "Serial.h"
+   3          #include "stdio.h"
+   4          //Èí¼þÑÓÊ±º¯Êý
+   5          void delay_ms(unsigned long i)
+   6          {
+   7   1        unsigned long x,y;
+   8   1        for (x=0; x<i; x++)
+   9   1          for (y=0; y<20; y++);
+  10   1      }
+  11          void Setup(void)
+  12          {
+  13   1        EA=0;
+  14   1        Serial_Setup();
+  15   1        EA=1;
+  16   1      }
+  17          void main()
+  18          {
+  19   1        Setup();
+  20   1        while(1)
+  21   1        {
+  22   2          Serial_printf("what the fuck!!!\r\n");
+  23   2          delay_ms(1000);
+  24   2        }
+  25   1      }
+  26          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    154    ----
+   CONSTANT SIZE    =     19    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      12
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

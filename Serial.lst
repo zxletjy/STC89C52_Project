@@ -1,0 +1,115 @@
+C51 COMPILER V9.55   SERIAL                                                                07/18/2016 23:24:14 PAGE 1   
+
+
+C51 COMPILER V9.55, COMPILATION OF MODULE SERIAL
+OBJECT MODULE PLACED IN Serial.obj
+COMPILER INVOKED BY: D:\Keil_C51\C51\BIN\C51.EXE Serial\Serial.c OPTIMIZE(8,SIZE) BROWSE INCDIR(.\Serial) DEBUG OBJECTEX
+                    -TEND PRINT(.\Serial.lst) TABS(2) OBJECT(Serial.obj)
+
+line level    source
+
+   1          #include "Serial.h"
+   2          #include <string.h>
+   3          #include <stdio.h>  
+   4          #include <stdarg.h> 
+   5          
+   6          unsigned int Serial_Tx_Length;//发送长度
+   7          unsigned int Serial_Tx_Count;//发送计数
+   8          uint8_t Serial_Tx_Buffer[SERIAL_MAX_TX_BUFFER];  //发送缓冲区
+   9          uint8_t Serial_Tx_Done;   //发送完成标志位
+  10          
+  11          void Serial_Setup(void)
+  12          {
+  13   1        TMOD&=0x0F;   //定时器1模式控制在高4位
+  14   1        TMOD|=0x20;    //定时器1工作在模式2，自动重装模式
+  15   1        SCON=0x50;     //串口工作在模式1
+  16   1        TH1=256-OSC_M/(BAUD_RATE*12*16);  //计算定时器重装值
+  17   1        TL1=256-OSC_M/(BAUD_RATE*12*16);
+  18   1        PCON|=0x80;    //串口波特率加倍
+  19   1        ES=1;         //串行中断允许
+  20   1        TR1=1;        //启动定时器1
+  21   1        REN=1;        //允许接收 
+  22   1      }
+  23          
+  24          void SendByte(unsigned char d)      //发送一个字节的数据，形参d即为待发送数据。
+  25          {
+  26   1        SBUF=d; //将数据写入到串口缓冲
+  27   1        while(TI == 0);
+  28   1        TI=0;
+  29   1      }
+  30          uint8_t SendString(unsigned char *p, int length)      //发送一个字节的数据，形参d即为待发送数据。
+  31          {   
+  32   1        uint8_t flag=0;
+  33   1          if (Serial_Tx_Done == 0)
+  34   1          {
+  35   2              Serial_Tx_Done = 1;
+  36   2              Serial_Tx_Count=0;
+  37   2              memcpy(Serial_Tx_Buffer, p, length);
+  38   2              Serial_Tx_Length = length;
+  39   2              SBUF = Serial_Tx_Buffer[Serial_Tx_Count++];
+  40   2              flag = 1;
+  41   2          }
+  42   1          else 
+  43   1          {
+  44   2              flag = 0;
+  45   2          }
+  46   1          return flag;
+  47   1      }
+  48          
+  49          uint8_t Serial_printf(const char *fmt,...)  
+  50          {  
+  51   1        uint8_t flag=0;
+  52   1        va_list ap; 
+  53   1        if (Serial_Tx_Done == 0)
+  54   1        {
+C51 COMPILER V9.55   SERIAL                                                                07/18/2016 23:24:14 PAGE 2   
+
+  55   2            Serial_Tx_Done = 1;
+  56   2            Serial_Tx_Count=0;
+  57   2            va_start(ap,fmt);
+  58   2            Serial_Tx_Length = vsprintf(Serial_Tx_Buffer,fmt,ap);
+  59   2            SBUF = Serial_Tx_Buffer[Serial_Tx_Count++];
+  60   2            va_end(ap);
+  61   2            flag = 1;
+  62   2        }
+  63   1        else 
+  64   1        {
+  65   2            flag = 0;
+  66   2        }
+  67   1        return flag;
+  68   1      }  
+  69          //利用中断来发送数据   
+  70          void Serial_IRQ(void) interrupt 4    //串口发送中断
+  71          {
+  72   1        if(RI)    //收到数据
+  73   1        {
+  74   2          RI=0;   //清中断请求
+  75   2        }
+  76   1        else      //发送完一字节数据
+  77   1        {
+  78   2            TI=0;
+  79   2              if ((Serial_Tx_Done == 1) && (Serial_Tx_Count < Serial_Tx_Length) && (Serial_Tx_Length != 0))
+  80   2              {
+  81   3                 SBUF = Serial_Tx_Buffer[Serial_Tx_Count++]; 
+  82   3              }
+  83   2              else if (Serial_Tx_Count >= Serial_Tx_Length)
+  84   2              {
+  85   3                 Serial_Tx_Done = 0;
+  86   3                 Serial_Tx_Length = 0;
+  87   3              }
+  88   2        }
+  89   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    248    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     37      23
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
