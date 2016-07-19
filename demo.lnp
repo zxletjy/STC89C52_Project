@@ -1,4 +1,0 @@
-"main.obj",
-"Serial.obj" 
-TO "demo" 
-RAMSIZE(256) 

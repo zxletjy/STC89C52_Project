@@ -1,6 +1,8 @@
 #include "define.h"
 #include "Serial.h"
-#include "stdio.h"
+#include <stdio.h>
+#include "spi.h"
+#include "nRF24L01.h"
 //Èí¼þÑÓÊ±º¯Êý
 void delay_ms(unsigned long i)
 {
@@ -17,9 +19,13 @@ void Setup(void)
 void main()
 {
 	Setup();
+	if (NRF_Check() == 1)
+	{
+		printf("Fuck Yeah!!!");
+	}
 	while(1)
 	{
-    Serial_printf("what the fuck!!!\r\n");
+    
 		delay_ms(1000);
 	}
 }
